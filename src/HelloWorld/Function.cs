@@ -125,5 +125,25 @@ namespace Book
         } 
     }
 
+    public class TimeoutLambda {
+        public void HandlerTimeout(Object inpu, ILambdaContext context){
+            Console.WriteLine("Here we go...");
+            while(true){
+                System.Threading.Thread.Sleep(100);
+                Console.WriteLine($"Context.getRemainingTimeInMillis: {context.RemainingTime}");
 
+            }
+        }
+    }
+
+    public class EnvVarLambda {
+        public void HandlerEnvVar(Object input){
+            var connString = Environment.GetEnvironmentVariable("AWS_REGION");
+            var param1 = Environment.GetEnvironmentVariable("PARAM1");
+
+            Console.WriteLine($"Conn string is {connString}");
+            Console.WriteLine($"PARAM1 env var is {param1}");
+
+        }
+    }
 }

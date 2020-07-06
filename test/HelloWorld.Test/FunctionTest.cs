@@ -57,28 +57,5 @@ namespace HelloWorld.Tests
             Assert.Equal(expectedResponse.StatusCode, response.StatusCode);
     }
 
-    [Fact]
-    public async Task TestHandleStream()
-    {
-        var bytes = Encoding.ASCII.GetBytes("Hello world\nAnother world");
-
-            var memoryStream = new MemoryStream();
-            memoryStream.Write(bytes);
-
-            var handler = new Book.StreamingLambda();
-
-            var result = handler.HandlerStream(memoryStream);
-            //using (var streamReader = new StreamReader(stream))
-            //{
-            //    while (streamReader.ReadLine() != null)
-            //    {
-            //        memoryStream.Write(Encoding.ASCII.GetBytes(streamReader.ReadLine().ToUpper()));
-            //    }
-            //}
-
-            //return memoryStream;
-
-
-    }
   }
 }
