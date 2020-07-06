@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Runtime.InteropServices.ComTypes;
+using System.Text;
 using Newtonsoft.Json;
 
 using Amazon.Lambda.Core;
@@ -122,6 +124,4 @@ namespace Book
         public string StatusCode { get; set; }
         public DateTime TimeStamp { get; set; }
     }
-
-
 }
