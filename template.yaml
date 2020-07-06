@@ -14,7 +14,7 @@ Resources:
     Properties:
       FunctionName: HelloWorldDotNet
       CodeUri: ./src/HelloWorld/
-      Handler: HelloWorld::Book.StringIntegerBoolean::HandlerBoolean # A value of the form assembly::namespace.class-name::method-name. For example, "MyApp::Example.Hello::MyHandler" calls the MyHandler method defined in MyApp.dll.
+      Handler: HelloWorld::Book.PocoLambda::HandlerPoco # A value of the form assembly::namespace.class-name::method-name. For example, "MyApp::Example.Hello::MyHandler" calls the MyHandler method defined in MyApp.dll.
       Runtime: dotnetcore3.1
       Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
         Variables:

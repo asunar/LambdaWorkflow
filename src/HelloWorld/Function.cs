@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Http;
+using System.Runtime.InteropServices.ComTypes;
 using Newtonsoft.Json;
 
 using Amazon.Lambda.Core;
@@ -68,5 +69,59 @@ namespace Book
             return input > 100;
         }
     }
+
+    public class ListLambda
+    {
+        public List<int> HandlerList(List<int> input)
+        {
+            return input.Select(x => x + 100).ToList();
+        }
+
+        public Dictionary<string, string> HandlerDictionary(
+            Dictionary<string, string> input)
+        {
+            var newDictionary = new Dictionary<string, string>();
+            input.ToList().ForEach(p => newDictionary.Add("New Map -> " + p.Key, p.Value));
+            return newDictionary;
+        }
+
+        public Dictionary<string, Dictionary<string, int>> HandlerNestedCollection(List<Dictionary<string, int>> input)
+        {
+            var newDictionary = new Dictionary<string, Dictionary<string, int>>();
+            var numbers = Enumerable.Range(0, input.Count);
+
+            numbers.ToList().ForEach(n => newDictionary.Add("Nested at position " + n, input.ElementAt(n)));
+
+            return newDictionary;
+        }
+
+
+    }
+
+    public class PocoLambda
+    {
+        public PocoResponse HandlerPoco(PocoInput input)
+        {
+            Console.WriteLine("Id:" + input.Id);
+            Console.WriteLine("Name:" + input.Name);
+            Console.WriteLine("BirthDate:" + input.BirthDate.ToShortDateString());
+            return new PocoResponse { ExitCode = 0, StatusCode="SUCCESS", TimeStamp=DateTime.Now};
+        } 
+    }
+
+    public class PocoInput
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public DateTime BirthDate { get; set; }
+    }
+
+    public class PocoResponse
+    {
+        public int ExitCode { get; set; }
+        public string StatusCode { get; set; }
+        public DateTime TimeStamp { get; set; }
+    }
+
 
 }

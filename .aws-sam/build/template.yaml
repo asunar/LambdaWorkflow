@@ -12,7 +12,7 @@ Resources:
     Properties:
       FunctionName: HelloWorldDotNet
       CodeUri: HelloWorldFunction
-      Handler: HelloWorld::Book.StringIntegerBoolean::HandlerBoolean
+      Handler: HelloWorld::Book.PocoLambda::HandlerPoco
       Runtime: dotnetcore3.1
       Environment:
         Variables:
