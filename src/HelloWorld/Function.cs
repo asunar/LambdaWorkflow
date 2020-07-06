@@ -102,6 +102,20 @@ namespace Book
 
     public class PocoLambda
     {
+        public class PocoInput
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public DateTime BirthDate { get; set; }
+        }
+
+        public class PocoResponse
+        {
+            public int ExitCode { get; set; }
+            public string StatusCode { get; set; }
+            public DateTime TimeStamp { get; set; }
+        }
+
         public PocoResponse HandlerPoco(PocoInput input)
         {
             Console.WriteLine("Id:" + input.Id);
@@ -111,17 +125,5 @@ namespace Book
         } 
     }
 
-    public class PocoInput
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public DateTime BirthDate { get; set; }
-    }
 
-    public class PocoResponse
-    {
-        public int ExitCode { get; set; }
-        public string StatusCode { get; set; }
-        public DateTime TimeStamp { get; set; }
-    }
 }
