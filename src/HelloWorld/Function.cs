@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.Model;
 using Newtonsoft.Json;
 
 using Amazon.Lambda.Core;
@@ -14,136 +18,47 @@ using Amazon.Lambda.APIGatewayEvents;
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
 
-namespace HelloWorld
-{
-
-    public class Function
-    {
-
-        private static readonly HttpClient client = new HttpClient();
-
-        private static async Task<string> GetCallingIP()
-        {
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Add("User-Agent", "AWS Lambda .Net Client");
-
-            var msg = await client.GetStringAsync("http://checkip.amazonaws.com/").ConfigureAwait(continueOnCapturedContext:false);
-
-            return msg.Replace("\n","");
-        }
-
-        public async Task<APIGatewayProxyResponse> FunctionHandler(APIGatewayProxyRequest apigProxyEvent, ILambdaContext context)
-        {
-
-            var location = await GetCallingIP();
-            var body = new Dictionary<string, string>
-            {
-                { "message", "hello world" },
-                { "location", location }
-            };
-
-            return new APIGatewayProxyResponse
-            {
-                Body = JsonConvert.SerializeObject(body),
-                StatusCode = 200,
-                Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
-            };
-        }
-    }
-}
-
 namespace Book
 {
-    public class StringIntegerBoolean
+    public class WeatherEventLambda
     {
-        public void HandlerString(string s)
+
+        private static readonly AmazonDynamoDBClient client = new AmazonDynamoDBClient();
+
+        private static string TableName =
+            Environment.GetEnvironmentVariable("LOCATIONS_TABLE");
+        public class WeatherEvent
         {
-            Console.WriteLine($"Hello, {s}");
+            public string LocationName { get; set; }
+            public double Temperature { get; set; }
+            public long Timestamp { get; set; }
+            public double Longitude { get; set; }
+            public double Latitude { get; set; }
         }
 
-        public Boolean HandlerBoolean(bool input)
+        public async Task<APIGatewayProxyResponse> HandlerWeatherEvent(APIGatewayProxyRequest request, ILambdaContext functionContext)
         {
-            return !input;
-        }
+            var weatherEvent = JsonConvert.DeserializeObject<WeatherEvent>(request.Body);
+            Console.WriteLine("LocationName is...");
+            Console.WriteLine(weatherEvent.LocationName);
+            Console.WriteLine(weatherEvent.Temperature);
+            Console.WriteLine(weatherEvent.Longitude);
+            Console.WriteLine(weatherEvent.Latitude);
 
-        public Boolean HandlerInt(int input)
-        {
-            return input > 100;
+            var context = new DynamoDBContext(client);
+            var dbrequest = new PutItemRequest { TableName = TableName };
+            dbrequest.Item = new Dictionary<string, AttributeValue>()
+            {
+                { "locationName", new AttributeValue { S = weatherEvent.LocationName} },
+                { "Temperature", new AttributeValue { N = weatherEvent.Temperature.ToString(CultureInfo.InvariantCulture)} },
+                { "Timestamp", new AttributeValue { N = weatherEvent.Timestamp.ToString(CultureInfo.InvariantCulture)} },
+                { "Longitude", new AttributeValue { N = weatherEvent.Longitude.ToString(CultureInfo.InvariantCulture)} },
+                { "Latitude", new AttributeValue { N = weatherEvent.Latitude.ToString(CultureInfo.InvariantCulture)} },
+            };
+
+            await client.PutItemAsync(dbrequest);
+            return new APIGatewayProxyResponse() { StatusCode = 200, Body = $"Weather event recorded for {weatherEvent.LocationName}" };
         }
     }
 
-    public class ListLambda
-    {
-        public List<int> HandlerList(List<int> input)
-        {
-            return input.Select(x => x + 100).ToList();
-        }
-
-        public Dictionary<string, string> HandlerDictionary(
-            Dictionary<string, string> input)
-        {
-            var newDictionary = new Dictionary<string, string>();
-            input.ToList().ForEach(p => newDictionary.Add("New Map -> " + p.Key, p.Value));
-            return newDictionary;
-        }
-
-        public Dictionary<string, Dictionary<string, int>> HandlerNestedCollection(List<Dictionary<string, int>> input)
-        {
-            var newDictionary = new Dictionary<string, Dictionary<string, int>>();
-            var numbers = Enumerable.Range(0, input.Count);
-
-            numbers.ToList().ForEach(n => newDictionary.Add("Nested at position " + n, input.ElementAt(n)));
-
-            return newDictionary;
-        }
-
-
-    }
-
-    public class PocoLambda
-    {
-        public class PocoInput
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public DateTime BirthDate { get; set; }
-        }
-
-        public class PocoResponse
-        {
-            public int ExitCode { get; set; }
-            public string StatusCode { get; set; }
-            public DateTime TimeStamp { get; set; }
-        }
-
-        public PocoResponse HandlerPoco(PocoInput input)
-        {
-            Console.WriteLine("Id:" + input.Id);
-            Console.WriteLine("Name:" + input.Name);
-            Console.WriteLine("BirthDate:" + input.BirthDate.ToShortDateString());
-            return new PocoResponse { ExitCode = 0, StatusCode="SUCCESS", TimeStamp=DateTime.Now};
-        } 
-    }
-
-    public class TimeoutLambda {
-        public void HandlerTimeout(Object inpu, ILambdaContext context){
-            Console.WriteLine("Here we go...");
-            while(true){
-                System.Threading.Thread.Sleep(100);
-                Console.WriteLine($"Context.getRemainingTimeInMillis: {context.RemainingTime}");
-
-            }
-        }
-    }
-
-    public class EnvVarLambda {
-        public void HandlerEnvVar(Object input){
-            var connString = Environment.GetEnvironmentVariable("AWS_REGION");
-            var param1 = Environment.GetEnvironmentVariable("PARAM1");
-
-            Console.WriteLine($"Conn string is {connString}");
-            Console.WriteLine($"PARAM1 env var is {param1}");
-
-        }
-    }
 }
