@@ -8,6 +8,7 @@ Globals:
   Function:
     MemorySize: 512
     Timeout: 25
+    Runtime: dotnetcore3.1
     Environment:
       Variables:
         LOCATIONS_TABLE: !Ref LocationsTable
@@ -18,15 +19,14 @@ Resources:
     Type: AWS::Serverless::SimpleTable
     Properties:
       PrimaryKey:
-        Name: locationName
+        Name: LocationName
         Type: String
 
   WeatherEventLambda:
-    Type: 'AWS::Serverless::Function'
+    Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./src/HelloWorld 
       Handler: HelloWorld::Book.WeatherEventLambda::HandlerWeatherEvent
-      Runtime: dotnetcore3.1
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref LocationsTable
@@ -36,3 +36,17 @@ Resources:
           Properties:
             Path: /events
             Method: POST
+  WeatherQueryLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src/HelloWorld
+      Handler: HelloWorld::Book.WeatherQueryEventLambda::HandlerWeatherQueryEvent
+      Policies:
+        - DynamoDBReadPolicy:
+           TableName: !Ref LocationsTable
+      Events:
+        ApiEvents:
+          Type: Api
+          Properties:
+            Path: /locations
+            Method: GET

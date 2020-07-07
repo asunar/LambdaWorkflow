@@ -9,6 +9,7 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
 using Newtonsoft.Json;
 
@@ -27,6 +28,7 @@ namespace Book
 
         private static string TableName =
             Environment.GetEnvironmentVariable("LOCATIONS_TABLE");
+
         public class WeatherEvent
         {
             public string LocationName { get; set; }
@@ -49,7 +51,7 @@ namespace Book
             var dbrequest = new PutItemRequest { TableName = TableName };
             dbrequest.Item = new Dictionary<string, AttributeValue>()
             {
-                { "locationName", new AttributeValue { S = weatherEvent.LocationName} },
+                { "LocationName", new AttributeValue { S = weatherEvent.LocationName} },
                 { "Temperature", new AttributeValue { N = weatherEvent.Temperature.ToString(CultureInfo.InvariantCulture)} },
                 { "Timestamp", new AttributeValue { N = weatherEvent.Timestamp.ToString(CultureInfo.InvariantCulture)} },
                 { "Longitude", new AttributeValue { N = weatherEvent.Longitude.ToString(CultureInfo.InvariantCulture)} },
@@ -61,4 +63,37 @@ namespace Book
         }
     }
 
+    public class WeatherQueryEventLambda
+    {
+        private static readonly AmazonDynamoDBClient client = new AmazonDynamoDBClient();
+
+        private static string TableName =
+            Environment.GetEnvironmentVariable("LOCATIONS_TABLE");
+
+        private const int DEFAULT_LIMIT = 50;
+
+        public async Task<APIGatewayProxyResponse> HandlerWeatherQueryEvent(
+            APIGatewayProxyRequest request)
+        {
+            var limit = DEFAULT_LIMIT;
+            if (request.QueryStringParameters.TryGetValue("limit", out var limitString))
+            {
+                limit = Convert.ToInt32(limitString);
+            }
+
+            var scanRequest = new ScanRequest(TableName) { Limit = limit };
+            var scanResult = await client.ScanAsync(scanRequest);
+
+            var context = new DynamoDBContext(client);
+
+
+            var events = scanResult.Items.Select(x => context.FromDocument<WeatherEventLambda.WeatherEvent>(Document.FromAttributeMap(x)));
+
+            return new APIGatewayProxyResponse()
+            {
+                StatusCode = 200,
+                Body = JsonConvert.SerializeObject(events)
+            };
+        }
+    }
 }

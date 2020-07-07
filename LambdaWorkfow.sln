@@ -14,10 +14,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9E16C85F-4E67-4318-A102-CDD27BCF7898}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		createWeatherEVent.sh = createWeatherEVent.sh
 		omnisharp.json = omnisharp.json
 		README.md = README.md
 		samconfig.toml = samconfig.toml
 		template.yaml = template.yaml
+		weatherEvent.json = weatherEvent.json
+		weatherQueryEvent.json = weatherQueryEvent.json
 	EndProjectSection
 EndProject
 Global
