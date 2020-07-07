@@ -41,13 +41,7 @@ namespace Book
         public async Task<APIGatewayProxyResponse> HandlerWeatherEvent(APIGatewayProxyRequest request, ILambdaContext functionContext)
         {
             var weatherEvent = JsonConvert.DeserializeObject<WeatherEvent>(request.Body);
-            Console.WriteLine("LocationName is...");
-            Console.WriteLine(weatherEvent.LocationName);
-            Console.WriteLine(weatherEvent.Temperature);
-            Console.WriteLine(weatherEvent.Longitude);
-            Console.WriteLine(weatherEvent.Latitude);
-
-            var context = new DynamoDBContext(client);
+                        var context = new DynamoDBContext(client);
             var dbrequest = new PutItemRequest { TableName = TableName };
             dbrequest.Item = new Dictionary<string, AttributeValue>()
             {
@@ -76,7 +70,7 @@ namespace Book
             APIGatewayProxyRequest request)
         {
             var limit = DEFAULT_LIMIT;
-            if (request.QueryStringParameters.TryGetValue("limit", out var limitString))
+            if (request.QueryStringParameters != null && request.QueryStringParameters.TryGetValue("limit", out var limitString))
             {
                 limit = Convert.ToInt32(limitString);
             }

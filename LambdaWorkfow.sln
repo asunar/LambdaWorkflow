@@ -16,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 		createWeatherEVent.sh = createWeatherEVent.sh
 		omnisharp.json = omnisharp.json
+		queryWeatherEvents.sh = queryWeatherEvents.sh
 		README.md = README.md
 		samconfig.toml = samconfig.toml
 		template.yaml = template.yaml
